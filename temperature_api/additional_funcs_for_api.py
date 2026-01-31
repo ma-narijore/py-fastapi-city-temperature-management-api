@@ -18,6 +18,9 @@ async def get_geocoded_city(city: str, client: httpx.AsyncClient):
     response.raise_for_status()
     data = response.json()
 
+    if not data:  # пустий список
+        raise ValueError(f"City '{city}' not found in geocoding API")
+
     return {
         "lat": data[0]["lat"],
         "lon": data[0]["lon"]

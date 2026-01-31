@@ -1,14 +1,12 @@
 from datetime import datetime
 
-from typing import List
-
 from pydantic import BaseModel
 
 
 class TemperatureBase(BaseModel):
     city_id: int
     date_time: datetime
-    temperature: List[float]
+    temperature: float
 
 
 class TemperatureUpdate(TemperatureBase):

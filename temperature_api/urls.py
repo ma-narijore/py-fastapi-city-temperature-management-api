@@ -2,9 +2,9 @@ import httpx
 
 import datetime
 
-from typing import Annotated
+from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -56,10 +56,18 @@ async def update_temperatures(session: AsyncSessionDep):
     return {"success": True}
 
 
-@router.get("/temperatures")
-def list_temperatures(session: SessionDep):
+@router.get("/temperatures", response_model=List[TemperatureRead])
+async def list_temperatures(
+        city_id: Optional[int] = Query(None, description="Filter temperatures by city ID"),
+        session: AsyncSessionDep = Depends(get_async_session)
+):
     stmt = select(DBTemperature)
-    return session.scalars(stmt).all()
+
+    if city_id is not None:
+        stmt = stmt.where(DBTemperature.city_id == city_id)
+
+    result = await session.scalars(stmt)
+    return result.all()
 
 
 @router.get("/temperatures/{city_id}", response_model=TemperatureRead)
@@ -69,7 +77,7 @@ def get_temperature(city_id: int, session: SessionDep):
     if temp_obj is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="City not found",
+            detail="Temperature record not found",
         )
 
     return temp_obj
