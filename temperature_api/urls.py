@@ -68,16 +68,3 @@ async def list_temperatures(
 
     result = await session.scalars(stmt)
     return result.all()
-
-
-@router.get("/temperatures/{city_id}", response_model=TemperatureRead)
-def get_temperature(city_id: int, session: SessionDep):
-    temp_obj = session.get(DBTemperature, city_id)
-
-    if temp_obj is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Temperature record not found",
-        )
-
-    return temp_obj
